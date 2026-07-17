@@ -1,8 +1,9 @@
 import type { User } from '@prisma/client';
 import { prisma } from '../../lib/prisma.js';
-import { hashPassword } from '../../utils/password.js';
+import { hashPassword, verifyPassword } from '../../utils/password.js';
 import { AppError } from '../../utils/app-error.js';
-import type { RegisterInput } from './auth.schema.js';
+import { issueTokens, type IssuedTokens } from './token.service.js';
+import type { LoginInput, RegisterInput } from './auth.schema.js';
 
 /** A user object safe to return in API responses (no credentials). */
 export type PublicUser = Pick<User, 'id' | 'email' | 'name' | 'role' | 'createdAt'>;
@@ -35,4 +36,21 @@ export const registerUser = async (input: RegisterInput): Promise<PublicUser> =>
   });
 
   return toPublicUser(user);
+};
+
+/**
+ * Authenticates a user by email + password. Uses a uniform 401 for both unknown
+ * email and wrong password so the endpoint cannot be used to enumerate accounts.
+ * On success, issues an access token and a persisted refresh token.
+ */
+export const loginUser = async (
+  input: LoginInput,
+): Promise<{ user: PublicUser; tokens: IssuedTokens }> => {
+  const user = await prisma.user.findUnique({ where: { email: input.email } });
+  if (!user || !(await verifyPassword(input.password, user.passwordHash))) {
+    throw AppError.unauthorized('Invalid email or password');
+  }
+
+  const tokens = await issueTokens(user);
+  return { user: toPublicUser(user), tokens };
 };
