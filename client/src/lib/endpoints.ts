@@ -22,6 +22,11 @@ export const authApi = {
     await api.post('/auth/logout');
     setAccessToken(null);
   },
+
+  async me(): Promise<User> {
+    const res = await api.get<{ user: User }>('/auth/me');
+    return res.data.user;
+  },
 };
 
 /** Payload for creating/updating a vehicle (price already converted to cents). */
