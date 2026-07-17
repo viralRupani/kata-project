@@ -7,9 +7,19 @@ import {
   createVehicleSchema,
   searchVehicleSchema,
   updateVehicleSchema,
+  quantitySchema,
   idParamSchema,
 } from './vehicles.schema.js';
-import { create, getOne, list, remove, search, update } from './vehicles.controller.js';
+import {
+  create,
+  getOne,
+  list,
+  purchase,
+  remove,
+  restock,
+  search,
+  update,
+} from './vehicles.controller.js';
 
 export const vehiclesRouter = Router();
 
@@ -36,4 +46,19 @@ vehiclesRouter.delete(
   authorize('ADMIN'),
   validate(idParamSchema, 'params'),
   asyncHandler(remove),
+);
+
+vehiclesRouter.post(
+  '/:id/purchase',
+  validate(idParamSchema, 'params'),
+  validate(quantitySchema),
+  asyncHandler(purchase),
+);
+
+vehiclesRouter.post(
+  '/:id/restock',
+  authorize('ADMIN'),
+  validate(idParamSchema, 'params'),
+  validate(quantitySchema),
+  asyncHandler(restock),
 );

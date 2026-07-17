@@ -38,6 +38,37 @@ export const deleteVehicle = async (id: string): Promise<void> => {
 };
 
 /**
+ * Purchases `qty` units, decrementing stock atomically. The `quantity >= qty`
+ * guard lives in the WHERE clause so the check-and-decrement is a single atomic
+ * SQL statement — concurrent purchases can never drive stock negative (no
+ * oversell). A zero-row result means either the vehicle is missing (404) or
+ * there isn't enough stock (409).
+ */
+export const purchaseVehicle = async (id: string, qty: number): Promise<Vehicle> => {
+  const result = await prisma.vehicle.updateMany({
+    where: { id, quantity: { gte: qty } },
+    data: { quantity: { decrement: qty } },
+  });
+
+  if (result.count === 0) {
+    const existing = await prisma.vehicle.findUnique({ where: { id } });
+    if (!existing) throw AppError.notFound('Vehicle not found');
+    throw AppError.conflict('Insufficient stock');
+  }
+
+  return getVehicle(id);
+};
+
+/** Restocks a vehicle by `qty` units (admin action). Throws 404 if missing. */
+export const restockVehicle = async (id: string, qty: number): Promise<Vehicle> => {
+  await getVehicle(id); // 404 if missing
+  return prisma.vehicle.update({
+    where: { id },
+    data: { quantity: { increment: qty } },
+  });
+};
+
+/**
  * Searches vehicles by any combination of make/model/category (case-insensitive,
  * partial match) and an inclusive price range.
  */
