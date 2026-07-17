@@ -1,0 +1,24 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: dealership_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: dealership
+      POSTGRES_PASSWORD: dealership
+      POSTGRES_DB: dealership
+    ports:
+      # Host 5434 -> container 5432 (avoids other local Postgres on 5432/5433)
+      - "5434:5432"
+    volumes:
+      - dealership_pgdata:/var/lib/postgresql/data
+      # Creates the dedicated test database on first boot
+      - ./docker/init-test-db.sql:/docker-entrypoint-initdb.d/init-test-db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dealership"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  dealership_pgdata:

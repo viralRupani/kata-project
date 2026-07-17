@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Coverage
+coverage/
+
+# Prisma
+server/prisma/*.db
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Vite
+client/dist/
+
+# Test artifacts
+*.local

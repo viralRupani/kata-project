@@ -1,0 +1,24 @@
+{
+  "name": "car-dealership-inventory",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Full-stack Car Dealership Inventory System (TDD kata)",
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "db:up": "docker-compose up -d",
+    "db:down": "docker-compose down",
+    "dev:server": "npm run dev -w server",
+    "dev:client": "npm run dev -w client",
+    "test:server": "npm run test -w server",
+    "test:client": "npm run test -w client",
+    "test": "npm run test:server && npm run test:client",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\"",
+    "lint": "npm run lint -w server && npm run lint -w client"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
