@@ -7,6 +7,7 @@ export default defineConfig({
     // Integration tests share a single Postgres test database, so run files
     // serially to avoid cross-test data races on the same tables.
     fileParallelism: false,
+    globalSetup: ['./src/tests/global-setup.ts'],
     setupFiles: ['./src/tests/setup.ts'],
     include: ['src/**/*.{test,spec}.ts'],
     coverage: {
