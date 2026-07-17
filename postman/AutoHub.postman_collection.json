@@ -1,0 +1,181 @@
+{
+  "info": {
+    "name": "AutoHub — Car Dealership API",
+    "description": "REST API for the Car Dealership Inventory System. Run 'Auth / Login (admin)' first — it stores the access token into the {{accessToken}} collection variable, which the protected requests send as a Bearer token.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:4000/api" },
+    { "key": "accessToken", "value": "" },
+    { "key": "vehicleId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Doe\",\n  \"email\": \"jane@example.com\",\n  \"password\": \"Password@123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body.accessToken) {",
+                  "  pm.collectionVariables.set('accessToken', body.accessToken);",
+                  "}",
+                  "pm.test('logged in', () => pm.expect(pm.response.code).to.eql(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@dealership.test\",\n  \"password\": \"Admin@12345\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "me"] }
+          }
+        },
+        {
+          "name": "Refresh",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/auth/refresh", "host": ["{{baseUrl}}"], "path": ["auth", "refresh"] }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/auth/logout", "host": ["{{baseUrl}}"], "path": ["auth", "logout"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Vehicles",
+      "item": [
+        {
+          "name": "List",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/vehicles", "host": ["{{baseUrl}}"], "path": ["vehicles"] }
+          }
+        },
+        {
+          "name": "Search",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/vehicles/search?make=Toyota&minPrice=1000000&maxPrice=3000000",
+              "host": ["{{baseUrl}}"],
+              "path": ["vehicles", "search"],
+              "query": [
+                { "key": "make", "value": "Toyota" },
+                { "key": "minPrice", "value": "1000000" },
+                { "key": "maxPrice", "value": "3000000" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const v = pm.response.json().vehicle;",
+                  "if (v && v.id) pm.collectionVariables.set('vehicleId', v.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/vehicles", "host": ["{{baseUrl}}"], "path": ["vehicles"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"make\": \"Hyundai\",\n  \"model\": \"Creta\",\n  \"category\": \"SUV\",\n  \"priceCents\": 1800000,\n  \"quantity\": 4\n}"
+            }
+          }
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/vehicles/{{vehicleId}}", "host": ["{{baseUrl}}"], "path": ["vehicles", "{{vehicleId}}"] },
+            "body": { "mode": "raw", "raw": "{\n  \"priceCents\": 1750000\n}" }
+          }
+        },
+        {
+          "name": "Purchase",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/vehicles/{{vehicleId}}/purchase", "host": ["{{baseUrl}}"], "path": ["vehicles", "{{vehicleId}}", "purchase"] },
+            "body": { "mode": "raw", "raw": "{\n  \"quantity\": 1\n}" }
+          }
+        },
+        {
+          "name": "Restock (admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/vehicles/{{vehicleId}}/restock", "host": ["{{baseUrl}}"], "path": ["vehicles", "{{vehicleId}}", "restock"] },
+            "body": { "mode": "raw", "raw": "{\n  \"quantity\": 5\n}" }
+          }
+        },
+        {
+          "name": "Delete (admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/vehicles/{{vehicleId}}", "host": ["{{baseUrl}}"], "path": ["vehicles", "{{vehicleId}}"] }
+          }
+        }
+      ]
+    }
+  ]
+}

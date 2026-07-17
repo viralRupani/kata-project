@@ -11,7 +11,6 @@ export const notFoundHandler = (_req: Request, _res: Response, next: NextFunctio
  * Centralized error middleware. Every thrown/forwarded error lands here and is
  * rendered as a consistent JSON envelope.
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const errorHandler = (err: unknown, _req: Request, res: Response, _next: NextFunction) => {
   if (err instanceof AppError) {
     res.status(err.statusCode).json({
