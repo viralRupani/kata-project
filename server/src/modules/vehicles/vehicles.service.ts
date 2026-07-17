@@ -1,7 +1,11 @@
 import type { Vehicle } from '@prisma/client';
 import { prisma } from '../../lib/prisma.js';
 import { AppError } from '../../utils/app-error.js';
-import type { CreateVehicleInput, SearchVehicleQuery } from './vehicles.schema.js';
+import type {
+  CreateVehicleInput,
+  SearchVehicleQuery,
+  UpdateVehicleInput,
+} from './vehicles.schema.js';
 
 /** Creates a new vehicle. */
 export const createVehicle = (input: CreateVehicleInput): Promise<Vehicle> =>
@@ -16,6 +20,21 @@ export const getVehicle = async (id: string): Promise<Vehicle> => {
   const vehicle = await prisma.vehicle.findUnique({ where: { id } });
   if (!vehicle) throw AppError.notFound('Vehicle not found');
   return vehicle;
+};
+
+/** Updates a vehicle's fields. Throws 404 if it does not exist. */
+export const updateVehicle = async (
+  id: string,
+  input: UpdateVehicleInput,
+): Promise<Vehicle> => {
+  await getVehicle(id); // 404 if missing
+  return prisma.vehicle.update({ where: { id }, data: input });
+};
+
+/** Deletes a vehicle. Throws 404 if it does not exist. */
+export const deleteVehicle = async (id: string): Promise<void> => {
+  await getVehicle(id); // 404 if missing
+  await prisma.vehicle.delete({ where: { id } });
 };
 
 /**
