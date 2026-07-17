@@ -38,6 +38,13 @@ export const registerUser = async (input: RegisterInput): Promise<PublicUser> =>
   return toPublicUser(user);
 };
 
+/** Returns the public profile of a user by id, or throws 401 if they no longer exist. */
+export const getCurrentUser = async (id: string): Promise<PublicUser> => {
+  const user = await prisma.user.findUnique({ where: { id } });
+  if (!user) throw AppError.unauthorized();
+  return toPublicUser(user);
+};
+
 /**
  * Authenticates a user by email + password. Uses a uniform 401 for both unknown
  * email and wrong password so the endpoint cannot be used to enumerate accounts.
