@@ -59,11 +59,14 @@ cp server/.env.example server/.env
 cp client/.env.example client/.env
 ```
 
-### 4. Migrate & seed
+### 4. Generate client, migrate & seed
 ```bash
-npm run prisma:migrate -w server
-npm run prisma:seed -w server        # creates the admin account
+npm run prisma:generate -w server    # generate the typed Prisma client
+npm run prisma:migrate -w server     # apply migrations
+npm run prisma:seed -w server        # creates the admin account + demo data
 ```
+
+> A step-by-step setup guide (with troubleshooting) is also in [`SETUP.md`](SETUP.md).
 
 ### 5. Run
 ```bash
